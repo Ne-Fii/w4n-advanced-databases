@@ -20,20 +20,30 @@ def delete_all_indexes():
 def create_indexes_btree():
 
     # Adding Btree index on user_id
+    #* Point 3.2, 3.4
     #! Index on the primary key! Not counted to the grade!
     IDX_USERS = """
     CREATE INDEX IF NOT EXISTS idx_users
     ON users USING btree (user_id);
     """
 
+    # Adding Btree index on user_date_of_birth
+    #* Point 3.5 / Counted to the grade
+    IDX_USER_BIRTH = """
+    CREATE INDEX IF NOT EXISTS idx_users_birth
+    ON users USING btree (user_date_of_birth);
+    """
+
     # Adding Btree index on post_id
-    #! Index onthe primary key! Not counted to the grade!
+    #* Point 3.7
+    #! Index on the primary key! Not counted to the grade!
     IDX_POSTS = """
     CREATE INDEX IF NOT EXISTS idx_posts 
     ON posts USING btree (post_id);
     """
 
     # Adding Btree index on comment_id
+    #* Point 3.7
     #! Index onthe primary key! Not counted to the grade!
     IDX_COMMENTS = """
     CREATE INDEX IF NOT EXISTS idx_comments 
@@ -42,10 +52,10 @@ def create_indexes_btree():
 
     # Adding Btree index on sale_id
     #! Index onthe primary key! Not counted to the grade!
-    IDX_SALES_OF_USER = """
-    CREATE INDEX IF NOT EXISTS idx_sales_of_user
-    ON Marketplace USING btree(sale_id);
-    """
+    # IDX_SALES_OF_USER = """
+    # CREATE INDEX IF NOT EXISTS idx_sales_of_user
+    # ON Marketplace USING btree(sale_id);
+    # """
 
     #Adding Btree index to employee_updated
     #* Point 3.1 / Counted to the grade
@@ -61,7 +71,9 @@ def create_indexes_btree():
     ON employees USING btree(employee_salary);
     """
 
-    
+    # Adding Btree index to employee_id
+    #* Point 3.3 
+    #! Index on the primary key
     IDX_EMPLOYEES = """
     CREATE INDEX IF NOT EXISTS idx_employees 
     ON employees USING btree (employee_id);
@@ -71,11 +83,15 @@ def create_indexes_btree():
     curr.execute(IDX_USERS)
     curr.execute(IDX_POSTS)
     curr.execute(IDX_COMMENTS)
-    curr.execute(IDX_SALES_OF_USER)
+    #curr.execute(IDX_SALES_OF_USER)
+    curr.execute(IDX_EMPLOYEE_SALARY)
+    curr.execute(IDX_EMPLOYEE_UPDATED)
+    curr.execute(IDX_USER_BIRTH)
     conn.commit()
     conn.close()
 
 
+# That might be good for experimental part
 def create_indexes_hash():
     IDX_USERS = """
     CREATE INDEX IF NOT EXISTS idx_users
@@ -110,21 +126,21 @@ def create_indexes_hash():
     conn.close()
 
 def create_indexes_function():
-    IDX_POSTS_BTREE = """
-    CREATE INDEX idx_posts ON posts 
-    USING btree 
-    (
-        regexp_split_to_table(COALESCE(string_agg(p.post_content, ' '), ''), E'\\s+')
-    );
-    """
-    IDX_COMMENTS_GIST = """
-    CREATE INDEX IF NOT EXISTS idx_comments 
-    ON comments USING gist (comment_id);
-    """
+    # IDX_POSTS_BTREE = """
+    # CREATE INDEX idx_posts ON posts 
+    # USING btree 
+    # (
+    #     regexp_split_to_table(COALESCE(string_agg(p.post_content, ' '), ''), E'\\s+')
+    # );
+    # """
+    # IDX_COMMENTS_GIST = """
+    # CREATE INDEX IF NOT EXISTS idx_comments 
+    # ON comments USING gist (comment_id);
+    # """
 
-    # Adding function index using gin()
+    # Adding function index using gin() to comment and post content
     #* Point 3.4 / Counted to the grade
-    IDX_POST_CONTENT = """
+    IDX_POST_COMMENT_CONTENT = """
     CREATE INDEX idx_posts_post_content_function 
     ON posts 
     USING gin(regexp_split_to_array(post_content, E'\\s+'));
@@ -134,9 +150,12 @@ def create_indexes_function():
     USING gin(regexp_split_to_array(comment_content, E'\\s+'));
     """
 
+
+
     conn, curr = connect()
-    curr.execute(IDX_POSTS_BTREE)
-    curr.execute(IDX_COMMENTS_GIST)
+    # curr.execute(IDX_POSTS_BTREE)
+    # curr.execute(IDX_COMMENTS_GIST)
+    curr.execute(IDX_POST_COMMENT_CONTENT)
     conn.commit()
     conn.close()
 
@@ -152,5 +171,19 @@ def create_indexes_composite():
 
     conn, curr = connect()
     curr.execute(IDX_COMPOSITE)
+    conn.commit()
+    conn.close()
+
+# Adding bitmap index to percentile_rank
+#* Point 3.3 / Counted to the grade
+def create_bitmap():
+    IDX_PERCENTILE_RANK = """
+    CREATE INDEX idx_percentile_rank 
+    ON RankedEmployees
+    USING BITMAP (percentile_rank);
+    """
+
+    conn, curr = connect()
+    curr.execute(IDX_PERCENTILE_RANK)
     conn.commit()
     conn.close()
