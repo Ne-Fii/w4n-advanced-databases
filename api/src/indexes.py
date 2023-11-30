@@ -19,23 +19,48 @@ def delete_all_indexes():
 
 def create_indexes_btree():
 
+    # Adding Btree index on user_id
+    #! Index on the primary key! Not counted to the grade!
     IDX_USERS = """
     CREATE INDEX IF NOT EXISTS idx_users
     ON users USING btree (user_id);
     """
 
+    # Adding Btree index on post_id
+    #! Index onthe primary key! Not counted to the grade!
     IDX_POSTS = """
     CREATE INDEX IF NOT EXISTS idx_posts 
     ON posts USING btree (post_id);
     """
+
+    # Adding Btree index on comment_id
+    #! Index onthe primary key! Not counted to the grade!
     IDX_COMMENTS = """
     CREATE INDEX IF NOT EXISTS idx_comments 
     ON comments USING btree (comment_id);
     """
+
+    # Adding Btree index on sale_id
+    #! Index onthe primary key! Not counted to the grade!
     IDX_SALES_OF_USER = """
     CREATE INDEX IF NOT EXISTS idx_sales_of_user
     ON Marketplace USING btree(sale_id);
     """
+
+    #Adding Btree index to employee_updated
+    #* Point 3.1 / Counted to the grade
+    IDX_EMPLOYEE_UPDATED = """
+    CREATE INDEX IF NOT EXISTS idx_employee_updated
+    ON employees USING btree(employee_updated_at);
+    """
+
+    #Adding Btree index to employee_salary
+    #* Point 3.1 / Counted to the grade
+    IDX_EMPLOYEE_SALARY = """
+    CREATE INDEX IF NOT EXISTS idx_employee_salary
+    ON employees USING btree(employee_salary);
+    """
+
     
     IDX_EMPLOYEES = """
     CREATE INDEX IF NOT EXISTS idx_employees 
@@ -85,24 +110,38 @@ def create_indexes_hash():
     conn.close()
 
 def create_indexes_function():
-    IDX_POSTS = """
+    IDX_POSTS_BTREE = """
     CREATE INDEX idx_posts ON posts 
     USING btree 
     (
         regexp_split_to_table(COALESCE(string_agg(p.post_content, ' '), ''), E'\\s+')
     );
     """
-    IDX_COMMENTS = """
+    IDX_COMMENTS_GIST = """
     CREATE INDEX IF NOT EXISTS idx_comments 
     ON comments USING gist (comment_id);
     """
 
+    # Adding function index using gin()
+    #* Point 3.4 / Counted to the grade
+    IDX_POST_CONTENT = """
+    CREATE INDEX idx_posts_post_content_function 
+    ON posts 
+    USING gin(regexp_split_to_array(post_content, E'\\s+'));
+
+    CREATE INDEX idx_comments_comment_content_function 
+    ON comments 
+    USING gin(regexp_split_to_array(comment_content, E'\\s+'));
+    """
+
     conn, curr = connect()
-    curr.execute(IDX_POSTS)
-    curr.execute(IDX_COMMENTS)
+    curr.execute(IDX_POSTS_BTREE)
+    curr.execute(IDX_COMMENTS_GIST)
     conn.commit()
     conn.close()
 
+# Adding composite indexes to user_id, post_id, comment_id
+#* Point 3.2 / Counted to the grade
 def create_indexes_composite():
     IDX_COMPOSITE = """
     CREATE INDEX idx_user_post_comment ON public.users (user_id)
@@ -115,42 +154,3 @@ def create_indexes_composite():
     curr.execute(IDX_COMPOSITE)
     conn.commit()
     conn.close()
-
-    
-
-
-def task5():
-    logs = None
-    # clean_logs()
-
-    # ? no bitmap indexes in postgresql ?
-    index_names = ["btree", "hash"]
-
-    delete_all_indexes()
-    
-    for _ in range(2):
-            monitor_function(select_all_user_informations, index=False)()
-            monitor_function(raise_salary_best_moderators, index=False)()
-            monitor_function(look_for_the_most_common_word, index=False)()
-            #monitor_function(most_engaged_users, index=FALSE)()
-            #monitor_function(get_average_age_of_users, index=FALSE)()
-            #monitor_function(increase_all_employee_salaries_by_10_percent_every_year, index=True, index_name=index_name)()
-            #monitor_function(deleting_all_user_not_connected_for_one_year, index=True, index_name=index_name)()
-            #monitor_function(bad_users, index=False)()
-
-    for index_name in index_names:
-        delete_all_indexes()
-        
-        if index_name == "btree":
-            create_indexes_btree()
-        elif index_name == "hash":
-            create_indexes_hash()
-        for _ in range(2):
-            monitor_function(select_all_user_informations, index=True, index_name=index_name)()
-            monitor_function(raise_salary_best_moderators, index=True, index_name=index_name)()
-            monitor_function(look_for_the_most_common_word, index=True, index_name=index_name)()
-            # monitor_function(most_engaged_users, index=True, index_name=index_name)()
-            # monitor_function(get_average_age_of_users, index=True, index_name=index_name)()
-            # monitor_function(increase_all_employee_salaries_by_10_percent_every_year, index=True, index_name=index_name)()
-            # monitor_function(deleting_all_user_not_connected_for_one_year, index=True, index_name=index_name)()
-            #monitor_function(bad_users, index=True, index_name=index_name)()
