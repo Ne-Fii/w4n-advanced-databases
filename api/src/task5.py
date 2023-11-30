@@ -100,6 +100,20 @@ def create_indexes_function():
     curr.execute(IDX_COMMENTS)
     conn.commit()
     conn.close()
+
+def create_indexes_composite():
+    IDX_COMPOSITE = """
+    CREATE INDEX idx_user_post_comment ON public.users (user_id)
+    INCLUDE (user_id),
+    public.comments (user_id, comment_id),
+    public.posts (user_id, post_id);
+    """
+
+    conn, curr = connect()
+    curr.execute(IDX_COMPOSITE)
+    conn.commit()
+    conn.close()
+
     
 
 
