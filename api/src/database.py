@@ -4,7 +4,7 @@ import psycopg2
 def connect():
     DB_NAME = "postgres"
     DB_USER = "postgres"
-    DB_PASS = "fuck"
+    DB_PASS = "root"
     DB_HOST = "db"
     DB_PORT = "5432"
 

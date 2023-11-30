@@ -40,12 +40,12 @@ def push_monitor_data_to_db(name, execution_time, index, index_name):
         conn.close()
 
 
-def extract_estimated_cost(func):
-    for quer in query_list:
-        with conn.cursor() as cursor:
-            Read data from database
-            sql = ("SELECT  EXPLAIN  FROM %s" , func.__name__) 
-            cursor.execute(sql)
+# def extract_estimated_cost(func):
+#     for quer in query_list:
+#         with conn.cursor() as cursor:
+#             Read data from database
+#             sql = ("SELECT  EXPLAIN  FROM %s" , func.__name__) 
+#             cursor.execute(sql)
     
 
 def separator(func):

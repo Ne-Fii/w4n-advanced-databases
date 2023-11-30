@@ -16,7 +16,7 @@ services:
       resources:
         limits:
           cpus: '4'
-          memory: 4096M
+          memory: 5G
         reservations:
           cpus: '0.0001'
           memory: 20M
@@ -37,7 +37,7 @@ services:
       resources:
         limits:
           cpus: '4'
-          memory: 4096M
+          memory: 5G
         reservations:
           cpus: '0.0001'
           memory: 20M
